@@ -4,7 +4,9 @@ import com.cloudingenieur.blueprint.payload.request.AuthenticationRequest;
 import com.cloudingenieur.blueprint.payload.request.RefreshTokenRequest;
 import com.cloudingenieur.blueprint.payload.request.RegisterRequest;
 import com.cloudingenieur.blueprint.payload.response.AuthenticationResponse;
+import com.cloudingenieur.blueprint.payload.response.EmailAlreadyExitResponse;
 import com.cloudingenieur.blueprint.payload.response.RefreshTokenResponse;
+import com.cloudingenieur.blueprint.repository.UserRepository;
 import com.cloudingenieur.blueprint.service.AuthenticationService;
 import com.cloudingenieur.blueprint.service.JwtService;
 import com.cloudingenieur.blueprint.service.RefreshTokenService;
@@ -17,7 +19,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import netscape.javascript.JSObject;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,9 +46,16 @@ public class AuthenticationController {
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserRepository userRepository;
+    private final EmailAlreadyExitResponse emailAlreadyExitResponse = new EmailAlreadyExitResponse("email already taken");
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@Valid @RequestBody RegisterRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(emailAlreadyExitResponse); //.body("email is already taken");
+        }
+
         AuthenticationResponse authenticationResponse = authenticationService.register(request);
         ResponseCookie jwtCookie = jwtService.generateJwtCookie(authenticationResponse.getAccessToken());
         ResponseCookie refreshTokenCookie = refreshTokenService.generateRefreshTokenCookie(authenticationResponse.getRefreshToken());
@@ -54,7 +65,7 @@ public class AuthenticationController {
                 .body(authenticationResponse);
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/login")
     @Operation(
             responses = {
                     @ApiResponse(

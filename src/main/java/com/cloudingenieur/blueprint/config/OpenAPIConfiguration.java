@@ -21,17 +21,17 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
         info = @Info(
                 contact = @Contact(
-                        name = "Mossaab",
-                        email = "frifita1@gmail.com"
+                        name = "Mohammed",
+                        email = "mohammed@cloudingenieur.com"
                 ),
                 title = "Spring Security 6+ APP",
-                description = "Spring Boot 3+ Spring Security 6+ example",
+                description = "Spring Boot 3.3.1 Spring Security 6.3.1 example",
                 version = "0.0.1-SNAPSHOT"
         ),
         servers = {
                 @Server(
                         description = "Development",
-                        url = "http://localhost:8086"
+                        url = "http://localhost:9091"
 
                 )
         },
